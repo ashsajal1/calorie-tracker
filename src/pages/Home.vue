@@ -5,7 +5,7 @@ import { ref } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
 
 const calorieStore = useCalorieStore();
-const { history, todayCalories } = useFoodHistoryStore();
+const { history, todayCalories, addFood } = useFoodHistoryStore();
 const visible = ref(false);
 const foodName = ref("");
 const calories = ref(0);
@@ -13,11 +13,7 @@ const calories = ref(0);
 const handleAddFood = () => {
   if (foodName.value && calories.value) {
     calorieStore.addCalories(calories.value);
-    history.push({
-      id: Date.now(),
-      name: foodName.value,
-      calories: calories.value,
-    });
+    addFood(foodName.value, calories.value);
     foodName.value = "";
     calories.value = 0;
 
