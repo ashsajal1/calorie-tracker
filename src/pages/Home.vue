@@ -38,11 +38,16 @@ function reset() {
       </button>
     </div>
   </div>
-  
-  <h2 class="text-2xl font-bold mt-8 p-3">Eating History</h2>
+
+  <div class="p-3 flex justify-between items-center">
+    <h2 class="text-2xl font-bold mt-8">Eating History</h2>
+    <Button icon="pi pi-plus" severity="secondaryf" class="mt-4" />
+  </div>
 
   <div>
-    <div class="flex flex-row w-full items-center gap-2 justify-between p-3 border-b dark:border-b-gray-700">
+    <div
+      class="flex flex-row w-full items-center gap-2 justify-between p-3 border-b dark:border-b-gray-700"
+    >
       <div class="flex flex-col gap-2 pb-2">
         <p class="text-lg font-bold">Food Name</p>
         <p class="text-sm text-gray-500 flex gap-2">
@@ -53,7 +58,11 @@ function reset() {
       </div>
       <div class="flex flex-row gap-2">
         <Button size="small" icon="pi pi-trash" severity="danger"></Button>
-        <Button size="small" icon="pi pi-pen-to-square" severity="secondary"></Button>
+        <Button
+          size="small"
+          icon="pi pi-pen-to-square"
+          severity="secondary"
+        ></Button>
       </div>
     </div>
   </div>
