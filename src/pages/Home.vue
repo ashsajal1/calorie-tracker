@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { useCalorieStore } from "@/stores/calorieStore";
-import { Card, Button } from "primevue";
+import { Card, Button, Dialog, InputText, InputNumber } from "primevue";
+import { ref } from "vue";
 
 const calorieStore = useCalorieStore();
+const visible = ref(false);
+const foodName = ref("");
+const calories = ref(0);
 
 function add() {
   calorieStore.addCalories(500);
@@ -41,8 +45,29 @@ function reset() {
 
   <div class="p-3 flex justify-between items-center">
     <h2 class="text-2xl font-bold mt-8">Eating History</h2>
-    <Button icon="pi pi-plus" severity="secondaryf" class="mt-4" />
+    <Button
+      @click="visible = true"
+      icon="pi pi-plus"
+      severity="secondary"
+      class="mt-4"
+    />
   </div>
+
+  <Dialog
+    v-model:visible="visible"
+    :header="`Add Food`"
+    :modal="true"
+    :draggable="false"
+    :resizable="false"
+  >
+    <div>
+      <div class="flex flex-col gap-2">
+        <InputText v-model="foodName" placeholder="Food Name" />
+        <InputNumber v-model="calories" placeholder="Calories" />
+        <Button class="w-full" @click="addFood" icon="pi pi-plus" severity="success" />
+      </div>
+    </div>
+  </Dialog>
 
   <div>
     <div
