@@ -3,15 +3,15 @@
     class="flex items-center justify-between p-4 border-b dark:border-b-gray-700"
   >
     <RouterLink to="/" class="text-2xl font-bold select-none cursor-pointer"
-      >Logo</RouterLink
+      >Calorie Tracker</RouterLink
     >
 
     <div class="flex items-center justify-between gap-2">
       <Button :icon="themeIcon" rounded severity="secondary" @click="next()" />
       <Button class="sm:hidden" icon="pi pi-bars" @click="toggleDrawer" />
       <div class="hidden sm:flex items-center justify-between gap-2">
-        <RouterLink to="/settings">
-          <Button icon="pi pi-cog"></Button>
+        <RouterLink to="/profile">
+          <Button icon="pi pi-user"></Button>
         </RouterLink>
         <RouterLink to="/about">
           <Button>About</Button>
