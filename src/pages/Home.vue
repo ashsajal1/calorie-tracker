@@ -17,8 +17,8 @@ function reset() {
 </script>
 
 <template>
-  <div class="p-4">
-    <h1 class="text-xl font-bold">Calories: {{ calorieStore.totalCalories }}</h1>
+  <div class="p-4 grid place-items-center">
+    <h1 class="text-xl font-bold h-40 w-40 rounded-full p-6 bg-green-500 text-center grid place-items-center">Calories: {{ calorieStore.totalCalories }}</h1>
     <p>{{ calorieStore.calorieStatus }}</p>
 
     <div class="space-x-2 mt-4">
