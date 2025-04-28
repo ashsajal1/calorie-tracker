@@ -2,8 +2,10 @@
 import { useCalorieStore } from "@/stores/calorieStore";
 import { Card, Button, Dialog, InputText, InputNumber } from "primevue";
 import { ref } from "vue";
+import { useFoodHistoryStore } from '../stores/foodHistoryStore';
 
 const calorieStore = useCalorieStore();
+const { history } = useFoodHistoryStore();
 const visible = ref(false);
 const foodName = ref("");
 const calories = ref(0);
@@ -64,7 +66,15 @@ function reset() {
       <div class="flex flex-col gap-2">
         <InputText v-model="foodName" placeholder="Food Name" />
         <InputNumber v-model="calories" placeholder="Calories" />
-        <Button class="w-full" @click="addFood; visible = false" icon="pi pi-plus" severity="success" />
+        <Button
+          class="w-full"
+          @click="
+            addFood;
+            visible = false;
+          "
+          icon="pi pi-plus"
+          severity="success"
+        />
       </div>
     </div>
   </Dialog>
@@ -72,11 +82,14 @@ function reset() {
   <div>
     <div
       class="flex flex-row w-full items-center gap-2 justify-between p-3 border-b dark:border-b-gray-700"
+
+      v-for="food in history"
+      :key="food.id"
     >
       <div class="flex flex-col gap-2 pb-2">
         <p class="text-lg font-bold">Food Name</p>
         <p class="text-sm text-gray-500 flex gap-2">
-          <span>Calories: 100</span>
+          <span>{{ food.name }}</span>
           -
           <span>12 Dec, 2024</span>
         </p>
