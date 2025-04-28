@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, watch, computed } from "vue";
+import { ref, watch } from "vue";
 
 interface FoodEntry {
   id: string;
@@ -10,15 +10,16 @@ interface FoodEntry {
 
 export const useFoodHistoryStore = defineStore("foodHistory", () => {
   const history = ref<FoodEntry[]>([]);
+  const todayCalories = ref(0);
 
   function addFood(name: string, calories: number) {
     const entry: FoodEntry = {
-      id: crypto.randomUUID(), // generate a unique ID
+      id: crypto.randomUUID(),
       name,
       calories,
       timestamp: new Date().toISOString(),
     };
-    history.value.unshift(entry); // add to the beginning
+    history.value = [entry, ...history.value]; // new array
   }
 
   function clearHistory() {
@@ -26,13 +27,9 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
   }
 
   function removeFood(id: string) {
-    const index = history.value.findIndex((entry) => entry.id === id);
-    if (index !== -1) {
-      history.value.splice(index, 1);
-    }
+    history.value = history.value.filter((entry) => entry.id !== id);
   }
 
-  // --- LocalStorage persistency ---
   const STORAGE_KEY = "food-history";
 
   function loadFromStorage() {
@@ -46,30 +43,28 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
     }
   }
 
+  // --- Update todayCalories whenever history changes ---
   watch(
     history,
     (newHistory) => {
+      const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+      todayCalories.value = newHistory
+        .filter((entry) => entry.timestamp?.slice(0, 10) === today)
+        .reduce((sum, entry) => sum + (entry.calories || 0), 0);
+
+      // Also persist to localStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
     },
-    { deep: true }
+    { deep: true, immediate: true } // run once at start
   );
 
-  // --- Calculate today's calories ---
-  const todayCalories = computed(() => {
-    const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
-    return history.value
-      .filter((entry) => entry?.timestamp?.slice(0, 10) === today)
-      .reduce((sum, entry) => sum + (entry.calories || 0), 0);
-  });
-
-  // load once when store is used
-  loadFromStorage();
+  loadFromStorage(); // load saved data
 
   return {
     history,
+    todayCalories,
     addFood,
     clearHistory,
-    todayCalories,
     removeFood,
   };
 });
