@@ -9,6 +9,21 @@ const { history } = useFoodHistoryStore();
 const visible = ref(false);
 const foodName = ref("");
 const calories = ref(0);
+
+const handleAddFood = () => {
+  if (foodName.value && calories.value) {
+    calorieStore.addCalories(calories.value);
+    history.push({
+      id: Date.now(),
+      name: foodName.value,
+      calories: calories.value,
+    });
+    foodName.value = "";
+    calories.value = 0;
+
+    visible.value = false;
+  }
+};
 </script>
 
 <template>
@@ -44,10 +59,7 @@ const calories = ref(0);
         <InputNumber v-model="calories" placeholder="Calories" />
         <Button
           class="w-full"
-          @click="
-            addFood;
-            visible = false;
-          "
+          @click="handleAddFood"
           icon="pi pi-plus"
           severity="success"
         />
