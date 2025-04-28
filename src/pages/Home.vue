@@ -64,7 +64,7 @@ function reset() {
       <div class="flex flex-col gap-2">
         <InputText v-model="foodName" placeholder="Food Name" />
         <InputNumber v-model="calories" placeholder="Calories" />
-        <Button class="w-full" @click="addFood" icon="pi pi-plus" severity="success" />
+        <Button class="w-full" @click="addFood; visible = false" icon="pi pi-plus" severity="success" />
       </div>
     </div>
   </Dialog>
