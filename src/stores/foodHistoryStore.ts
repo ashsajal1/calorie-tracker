@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia';
-import { ref, watch } from 'vue';
+import { defineStore } from "pinia";
+import { ref, watch, computed } from "vue";
 
 interface FoodEntry {
   name: string;
@@ -7,7 +7,7 @@ interface FoodEntry {
   timestamp: string; // ISO string
 }
 
-export const useFoodHistoryStore = defineStore('foodHistory', () => {
+export const useFoodHistoryStore = defineStore("foodHistory", () => {
   const history = ref<FoodEntry[]>([]);
 
   function addFood(name: string, calories: number) {
@@ -24,7 +24,7 @@ export const useFoodHistoryStore = defineStore('foodHistory', () => {
   }
 
   // --- LocalStorage persistency ---
-  const STORAGE_KEY = 'food-history';
+  const STORAGE_KEY = "food-history";
 
   function loadFromStorage() {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -32,14 +32,26 @@ export const useFoodHistoryStore = defineStore('foodHistory', () => {
       try {
         history.value = JSON.parse(saved);
       } catch (error) {
-        console.error('Failed to parse food history from storage', error);
+        console.error("Failed to parse food history from storage", error);
       }
     }
   }
 
-  watch(history, (newHistory) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
-  }, { deep: true });
+  watch(
+    history,
+    (newHistory) => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+    },
+    { deep: true }
+  );
+
+  // --- Calculate today's calories ---
+  const todayCalories = computed(() => {
+    const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+    return history.value
+      .filter((entry) => entry?.timestamp?.slice(0, 10) === today)
+      .reduce((sum, entry) => sum + (entry.calories || 0), 0);
+  });
 
   // load once when store is used
   loadFromStorage();
@@ -48,5 +60,6 @@ export const useFoodHistoryStore = defineStore('foodHistory', () => {
     history,
     addFood,
     clearHistory,
+    todayCalories,
   };
 });

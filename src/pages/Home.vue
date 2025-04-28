@@ -5,7 +5,7 @@ import { ref } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
 
 const calorieStore = useCalorieStore();
-const { history } = useFoodHistoryStore();
+const { history, todayCalories } = useFoodHistoryStore();
 const visible = ref(false);
 const foodName = ref("");
 const calories = ref(0);
@@ -31,7 +31,7 @@ const handleAddFood = () => {
     <h1
       class="text-xl font-bold h-40 w-40 rounded-full p-6 bg-green-500 text-center grid place-items-center"
     >
-      Calories: {{ calorieStore.totalCalories }}
+      Calories: {{ todayCalories }}
     </h1>
     <p>{{ calorieStore.calorieStatus }}</p>
   </div>
