@@ -25,6 +25,13 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
     history.value = [];
   }
 
+  function removeFood(id: string) {
+    const index = history.value.findIndex((entry) => entry.id === id);
+    if (index !== -1) {
+      history.value.splice(index, 1);
+    }
+  }
+
   // --- LocalStorage persistency ---
   const STORAGE_KEY = "food-history";
 
@@ -63,5 +70,6 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
     addFood,
     clearHistory,
     todayCalories,
+    removeFood,
   };
 });
