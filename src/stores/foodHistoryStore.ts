@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, watch, computed } from "vue";
 
 interface FoodEntry {
+  id: string;
   name: string;
   calories: number;
   timestamp: string; // ISO string
@@ -12,6 +13,7 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
 
   function addFood(name: string, calories: number) {
     const entry: FoodEntry = {
+      id: crypto.randomUUID(), // generate a unique ID
       name,
       calories,
       timestamp: new Date().toISOString(),
