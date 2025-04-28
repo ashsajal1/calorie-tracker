@@ -6,7 +6,8 @@ import { useFoodHistoryStore } from "../stores/foodHistoryStore";
 import { formatTime } from "../utils/lib";
 
 const calorieStore = useCalorieStore();
-const { history, todayCalories, addFood, removeFood } = useFoodHistoryStore();
+const foodHistoryStore = useFoodHistoryStore();
+// const { history, todayCalories, addFood, removeFood } = foodHistoryStore;
 const visible = ref(false);
 const foodName = ref("");
 const calories = ref(0);
@@ -14,7 +15,7 @@ const calories = ref(0);
 const handleAddFood = () => {
   if (foodName.value && calories.value) {
     calorieStore.addCalories(calories.value);
-    addFood(foodName.value, calories.value);
+    foodHistoryStore.addFood(foodName.value, calories.value);
     foodName.value = "";
     calories.value = 0;
 
@@ -28,7 +29,7 @@ const handleAddFood = () => {
     <h1
       class="text-xl font-bold h-40 w-40 rounded-full p-6 bg-green-500 text-center grid place-items-center"
     >
-      Calories: {{ todayCalories }}
+      Calories: {{ foodHistoryStore.todayCalories }}
     </h1>
     <p>{{ calorieStore.calorieStatus }}</p>
   </div>
@@ -67,7 +68,7 @@ const handleAddFood = () => {
   <div>
     <div
       class="flex flex-row w-full items-center gap-2 justify-between p-3 border-b dark:border-b-gray-700"
-      v-for="food in history"
+      v-for="food in foodHistoryStore.history"
       :key="food.id"
     >
       <div class="flex flex-col gap-2 pb-2">
@@ -80,7 +81,7 @@ const handleAddFood = () => {
       </div>
       <div class="flex flex-row gap-2">
         <Button
-          @click="removeFood(food.id)"
+          @click="foodHistoryStore.removeFood(food.id)"
           size="small"
           icon="pi pi-trash"
           severity="danger"

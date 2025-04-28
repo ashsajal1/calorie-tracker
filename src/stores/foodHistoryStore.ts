@@ -12,6 +12,8 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
   const history = ref<FoodEntry[]>([]);
   const todayCalories = ref(0);
 
+  const STORAGE_KEY = "food-history";
+
   function addFood(name: string, calories: number) {
     const entry: FoodEntry = {
       id: crypto.randomUUID(),
@@ -19,7 +21,7 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
       calories,
       timestamp: new Date().toISOString(),
     };
-    history.value = [entry, ...history.value]; // new array
+    history.value = [entry, ...history.value];
   }
 
   function clearHistory() {
@@ -30,35 +32,42 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
     history.value = history.value.filter((entry) => entry.id !== id);
   }
 
-  const STORAGE_KEY = "food-history";
+  function calculateTodayCalories() {
+    const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+    todayCalories.value = history.value
+      .filter((entry) => entry.timestamp?.slice(0, 10) === today)
+      .reduce((sum, entry) => sum + (entry.calories || 0), 0);
+  }
 
   function loadFromStorage() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        history.value = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          history.value = parsed;
+        } else {
+          console.warn("Invalid data in localStorage, resetting history.");
+          history.value = [];
+        }
       } catch (error) {
         console.error("Failed to parse food history from storage", error);
+        history.value = [];
       }
     }
+    calculateTodayCalories(); // <<< recalculate after loading
   }
 
-  // --- Update todayCalories whenever history changes ---
   watch(
     history,
     (newHistory) => {
-      const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
-      todayCalories.value = newHistory
-        .filter((entry) => entry.timestamp?.slice(0, 10) === today)
-        .reduce((sum, entry) => sum + (entry.calories || 0), 0);
-
-      // Also persist to localStorage
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+      calculateTodayCalories(); // <<< recalculate after any change
     },
-    { deep: true, immediate: true } // run once at start
+    { deep: true }
   );
 
-  loadFromStorage(); // load saved data
+  loadFromStorage();
 
   return {
     history,
