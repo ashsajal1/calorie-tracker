@@ -21,10 +21,6 @@ const handleAddFood = () => {
     visible.value = false;
   }
 };
-
-const handleRemoveFood = (id: string) => {
-  removeFood(id);
-};
 </script>
 
 <template>
@@ -84,7 +80,7 @@ const handleRemoveFood = (id: string) => {
       </div>
       <div class="flex flex-row gap-2">
         <Button
-          @click="handleRemoveFood"
+          @click="removeFood(food.id)"
           size="small"
           icon="pi pi-trash"
           severity="danger"
