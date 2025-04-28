@@ -1,7 +1,8 @@
 {
-  "name": "vue3-fancy-template",
+  "name": "calorie-tracker",
+  "description": "A calorie tracker app built with Vue 3, Vite, and Tailwind CSS.",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
