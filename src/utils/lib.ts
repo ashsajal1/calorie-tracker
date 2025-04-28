@@ -37,3 +37,9 @@ export const capitalizeFirstLetter = (string: string): string => {
 export const toCamelCase = (str: string): string => {
   return str.replace(/-./g, (match) => match.charAt(1).toUpperCase());
 };
+
+
+export function formatTime(isoTimestamp: string) {
+  const date = new Date(isoTimestamp);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}

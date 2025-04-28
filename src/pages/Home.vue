@@ -3,6 +3,7 @@ import { useCalorieStore } from "@/stores/calorieStore";
 import { Card, Button, Dialog, InputText, InputNumber } from "primevue";
 import { ref } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
+import { formatTime } from '../utils/lib';
 
 const calorieStore = useCalorieStore();
 const { history, todayCalories, addFood } = useFoodHistoryStore();
@@ -53,7 +54,7 @@ const handleAddFood = () => {
         <p class="text-sm text-gray-500 flex gap-2">
           <span>{{ food.calories }} calories</span>
           -
-          <span>{{ food.timestamp }}</span>
+          <span>{{ formatTime(food.timestamp) }}</span>
         </p>
       </div>
       <div class="flex flex-row gap-2">
