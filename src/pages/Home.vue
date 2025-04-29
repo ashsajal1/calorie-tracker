@@ -87,7 +87,7 @@ const handleAddFood = () => {
       <InputNumber v-model="selectedFood.calories" placeholder="Calories" />
       <Button
         class="w-full"
-        @click="foodHistoryStore.editFood(selectedFood!.id, selectedFood!.name, selectedFood!.calories)"
+        @click="foodHistoryStore.editFood(selectedFood!.id, selectedFood!.name, selectedFood!.calories); visibleEdit = false"
         icon="pi pi-plus"
         severity="success"
       />
