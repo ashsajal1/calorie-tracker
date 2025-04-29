@@ -9,6 +9,8 @@ const calorieStore = useCalorieStore();
 const foodHistoryStore = useFoodHistoryStore();
 // const { history, todayCalories, addFood, removeFood } = foodHistoryStore;
 const visible = ref(false);
+const visibleEdit = ref(false);
+
 const foodName = ref("");
 const calories = ref(0);
 
@@ -65,6 +67,27 @@ const handleAddFood = () => {
     </div>
   </Dialog>
 
+  <!-- Edit dialog -->
+  <Dialog
+    v-model:visible="visibleEdit"
+    :header="`Edit Food`"
+    :modal="true"
+    :draggable="false"
+    :resizable="false"
+  >
+    <div></div>
+    <div class="flex flex-col gap-2">
+      <InputText v-model="foodName" placeholder="Food Name" />
+      <InputNumber v-model="calories" placeholder="Calories" />
+      <Button
+        class="w-full"
+        @click="handleAddFood"
+        icon="pi pi-plus"
+        severity="success"
+      />
+    </div>
+  </Dialog>
+
   <div>
     <div
       class="flex flex-row w-full items-center gap-2 justify-between p-3 border-b dark:border-b-gray-700"
@@ -87,6 +110,8 @@ const handleAddFood = () => {
           severity="danger"
         ></Button>
         <Button
+          @click="visibleEdit = true"
+          :disabled="foodHistoryStore.history.length === 0"
           size="small"
           icon="pi pi-pen-to-square"
           severity="secondary"
