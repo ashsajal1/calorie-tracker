@@ -33,96 +33,114 @@ const handleAddFood = () => {
 </script>
 
 <template>
-  <div class="p-4 grid place-items-center">
-    <h1
-      class="text-xl font-bold h-40 w-40 rounded-full p-6 bg-green-500 text-center grid place-items-center"
+  <main class="flex sm:flex-row flex-col gap-4 p-4 md:justify-between">
+    <div class="p-4 grid place-items-center">
+      <h1
+        class="text-xl font-bold h-40 w-40 rounded-full p-6 bg-green-500 text-center grid place-items-center"
+      >
+        Calories: {{ foodHistoryStore.todayCalories }}
+      </h1>
+      <p>{{ calorieStore.calorieStatus }}</p>
+    </div>
+
+    <Dialog
+      v-model:visible="visible"
+      :header="`Add Food`"
+      :modal="true"
+      :draggable="false"
+      :resizable="false"
     >
-      Calories: {{ foodHistoryStore.todayCalories }}
-    </h1>
-    <p>{{ calorieStore.calorieStatus }}</p>
-  </div>
+      <div>
+        <div class="flex flex-col gap-2">
+          <InputText v-model="foodName" placeholder="Food Name" />
+          <InputNumber v-model="calories" placeholder="Calories" />
+          <Button
+            class="w-full"
+            @click="handleAddFood"
+            icon="pi pi-plus"
+            severity="success"
+          />
+        </div>
+      </div>
+    </Dialog>
 
-  <div class="p-3 flex justify-between items-center">
-    <h2 class="text-2xl font-bold mt-8">Eating History</h2>
-    <Button
-      @click="visible = true"
-      icon="pi pi-plus"
-      severity="secondary"
-      class="mt-4"
-    />
-  </div>
-
-  <Dialog
-    v-model:visible="visible"
-    :header="`Add Food`"
-    :modal="true"
-    :draggable="false"
-    :resizable="false"
-  >
-    <div>
+    <!-- Edit dialog -->
+    <Dialog
+      v-model:visible="visibleEdit"
+      :header="`Edit Food`"
+      :modal="true"
+      :draggable="false"
+      :resizable="false"
+    >
+      <div></div>
       <div class="flex flex-col gap-2">
-        <InputText v-model="foodName" placeholder="Food Name" />
-        <InputNumber v-model="calories" placeholder="Calories" />
+        <InputText v-model="selectedFood.name" placeholder="Food Name" />
+        <InputNumber v-model="selectedFood.calories" placeholder="Calories" />
         <Button
           class="w-full"
-          @click="handleAddFood"
+          @click="
+            foodHistoryStore.editFood(
+              selectedFood!.id,
+              selectedFood!.name,
+              selectedFood!.calories
+            );
+            visibleEdit = false;
+          "
           icon="pi pi-plus"
           severity="success"
         />
       </div>
-    </div>
-  </Dialog>
+    </Dialog>
 
-  <!-- Edit dialog -->
-  <Dialog
-    v-model:visible="visibleEdit"
-    :header="`Edit Food`"
-    :modal="true"
-    :draggable="false"
-    :resizable="false"
-  >
-    <div></div>
-    <div class="flex flex-col gap-2">
-      <InputText v-model="selectedFood.name" placeholder="Food Name" />
-      <InputNumber v-model="selectedFood.calories" placeholder="Calories" />
-      <Button
-        class="w-full"
-        @click="foodHistoryStore.editFood(selectedFood!.id, selectedFood!.name, selectedFood!.calories); visibleEdit = false"
-        icon="pi pi-plus"
-        severity="success"
-      />
-    </div>
-  </Dialog>
-
-  <div>
-    <div
-      class="flex flex-row w-full items-center gap-2 justify-between p-3 border-b dark:border-b-gray-700"
-      v-for="food in foodHistoryStore.history"
-      :key="food.id"
-    >
-      <div class="flex flex-col gap-2 pb-2">
-        <p class="text-lg font-bold">{{ food.name }}</p>
-        <p class="text-sm text-gray-500 flex gap-2">
-          <span>{{ food.calories }} calories</span>
-          -
-          <span>{{ formatTime(food.timestamp) }}</span>
-        </p>
-      </div>
-      <div class="flex flex-row gap-2">
+    <section class="flex flex-col w-full md:w-1/2">
+      <div class="p-3 flex justify-between items-center">
+        <h2 class="text-2xl font-bold mt-8">Eating History</h2>
         <Button
-          @click="foodHistoryStore.removeFood(food.id)"
-          size="small"
-          icon="pi pi-trash"
-          severity="danger"
-        ></Button>
-        <Button
-          @click="visibleEdit = true; selectedFood = { id: food.id, name: food.name, calories: food.calories }"
-          :disabled="foodHistoryStore.history.length === 0"
-          size="small"
-          icon="pi pi-pen-to-square"
+          @click="visible = true"
+          icon="pi pi-plus"
           severity="secondary"
-        ></Button>
+          class="mt-4"
+        />
       </div>
-    </div>
-  </div>
+
+      <div>
+        <div
+          class="flex flex-row w-full items-center gap-2 justify-between p-3 border-b dark:border-b-gray-700"
+          v-for="food in foodHistoryStore.history"
+          :key="food.id"
+        >
+          <div class="flex flex-col gap-2 pb-2">
+            <p class="text-lg font-bold">{{ food.name }}</p>
+            <p class="text-sm text-gray-500 flex gap-2">
+              <span>{{ food.calories }} calories</span>
+              -
+              <span>{{ formatTime(food.timestamp) }}</span>
+            </p>
+          </div>
+          <div class="flex flex-row gap-2">
+            <Button
+              @click="foodHistoryStore.removeFood(food.id)"
+              size="small"
+              icon="pi pi-trash"
+              severity="danger"
+            ></Button>
+            <Button
+              @click="
+                visibleEdit = true;
+                selectedFood = {
+                  id: food.id,
+                  name: food.name,
+                  calories: food.calories,
+                };
+              "
+              :disabled="foodHistoryStore.history.length === 0"
+              size="small"
+              icon="pi pi-pen-to-square"
+              severity="secondary"
+            ></Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 </template>
