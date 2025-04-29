@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCalorieStore } from "@/stores/calorieStore";
 import { Card, Button, Dialog, InputText, InputNumber } from "primevue";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
 import { formatTime } from "../utils/lib";
 
@@ -13,6 +13,12 @@ const visibleEdit = ref(false);
 
 const foodName = ref("");
 const calories = ref(0);
+
+const selectedFood = reactive({
+  id: "",
+  name: "",
+  calories: 0,
+});
 
 const handleAddFood = () => {
   if (foodName.value && calories.value) {
@@ -77,11 +83,11 @@ const handleAddFood = () => {
   >
     <div></div>
     <div class="flex flex-col gap-2">
-      <InputText v-model="foodName" placeholder="Food Name" />
-      <InputNumber v-model="calories" placeholder="Calories" />
+      <InputText v-model="selectedFood.name" placeholder="Food Name" />
+      <InputNumber v-model="selectedFood.calories" placeholder="Calories" />
       <Button
         class="w-full"
-        @click="handleAddFood"
+        @click="foodHistoryStore.editFood(selectedFood!.id, selectedFood!.name, selectedFood!.calories)"
         icon="pi pi-plus"
         severity="success"
       />
@@ -110,7 +116,7 @@ const handleAddFood = () => {
           severity="danger"
         ></Button>
         <Button
-          @click="visibleEdit = true"
+          @click="visibleEdit = true; selectedFood = { id: food.id, name: food.name, calories: food.calories }"
           :disabled="foodHistoryStore.history.length === 0"
           size="small"
           icon="pi pi-pen-to-square"
