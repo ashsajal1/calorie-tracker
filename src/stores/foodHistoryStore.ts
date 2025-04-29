@@ -32,6 +32,14 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
     history.value = history.value.filter((entry) => entry.id !== id);
   }
 
+  function editFood(id: string, name: string, calories: number) {
+    const entryIndex = history.value.findIndex((entry) => entry.id === id);
+    if (entryIndex !== -1) {
+      history.value[entryIndex].name = name;
+      history.value[entryIndex].calories = calories;
+    }
+  }
+
   function calculateTodayCalories() {
     const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
     todayCalories.value = history.value
@@ -75,5 +83,6 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
     addFood,
     clearHistory,
     removeFood,
+    editFood,
   };
 });
