@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCalorieStore } from "@/stores/calorieStore";
-import { Card, Button, Dialog, InputText, InputNumber } from "primevue";
+import { Button, Dialog, InputText, InputNumber } from "primevue";
 import { reactive, ref } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
 import { formatTime } from "../utils/lib";
