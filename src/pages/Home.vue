@@ -4,6 +4,7 @@ import { Button, Dialog, InputText, InputNumber } from "primevue";
 import { reactive, ref } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
 import { formatTime } from "../utils/lib";
+import WaveProgress from "@/components/WaveProgress.vue";
 
 const calorieStore = useCalorieStore();
 const foodHistoryStore = useFoodHistoryStore();
@@ -35,12 +36,7 @@ const handleAddFood = () => {
 <template>
   <main class="flex sm:flex-row flex-col gap-4 p-4 md:justify-between">
     <div class="p-4 grid place-items-center">
-      <h1
-        class="text-xl font-bold h-40 w-40 rounded-full p-6 bg-green-500 text-center grid place-items-center"
-      >
-        Calories: {{ foodHistoryStore.todayCalories }}
-      </h1>
-      <p>{{ calorieStore.calorieStatus }}</p>
+     <WaveProgress :current="foodHistoryStore.todayCalories" :target="1500" />
     </div>
 
     <Dialog
