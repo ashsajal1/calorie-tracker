@@ -3,6 +3,7 @@ import { createWebHistory, createRouter } from "vue-router";
 import HomeView from "./pages/Home.vue";
 import AboutView from "./pages/About.vue";
 import NotFound from "./pages/NotFound.vue";
+import Profile from "./pages/Profile.vue";
 
 const routes = [
   {
@@ -16,6 +17,14 @@ const routes = [
     meta: {
       title: "About Us",
       description: "Learn more about us on this page.",
+    },
+  },
+  {
+    path: "/profile",
+    component: Profile,
+    meta: {
+      title: "Profile",
+      description: "See or edit your profile here.",
     },
   },
   { path: "/:pathMatch(.*)*", component: NotFound },
