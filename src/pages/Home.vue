@@ -1,14 +1,27 @@
 <script setup lang="ts">
 import { useCalorieStore } from "@/stores/calorieStore";
 import { Button, Dialog, InputText, InputNumber } from "primevue";
-import { reactive, ref } from "vue";
+import { reactive, ref, computed } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
 import { formatTime } from "../utils/lib";
 import WaveProgress from "@/components/WaveProgress.vue";
 
+interface FoodGroup {
+  foods: Array<{
+    id: string;
+    name: string;
+    calories: number;
+    timestamp: string;
+  }>;
+  totalCalories: number;
+}
+
+interface GroupedHistory {
+  [date: string]: FoodGroup;
+}
+
 const calorieStore = useCalorieStore();
 const foodHistoryStore = useFoodHistoryStore();
-// const { history, todayCalories, addFood, removeFood } = foodHistoryStore;
 const visible = ref(false);
 const visibleEdit = ref(false);
 
@@ -19,6 +32,31 @@ const selectedFood = reactive({
   id: "",
   name: "",
   calories: 0,
+});
+
+const groupedHistory = computed(() => {
+  const groups = foodHistoryStore.history.reduce((acc: GroupedHistory, food) => {
+    const date = new Date(food.timestamp).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    
+    if (!acc[date]) {
+      acc[date] = {
+        foods: [],
+        totalCalories: 0
+      };
+    }
+    
+    acc[date].foods.push(food);
+    acc[date].totalCalories += food.calories;
+    return acc;
+  }, {});
+
+  return Object.entries(groups).sort((a, b) => 
+    new Date(b[0]).getTime() - new Date(a[0]).getTime()
+  );
 });
 
 const handleAddFood = () => {
@@ -36,7 +74,7 @@ const handleAddFood = () => {
 <template>
   <main class="flex sm:flex-row flex-col gap-4 p-4 md:justify-between">
     <div class="p-4 grid place-items-center">
-     <WaveProgress :current="foodHistoryStore.todayCalories" :target="1500" />
+      <WaveProgress :current="foodHistoryStore.todayCalories" :target="1500" />
     </div>
 
     <Dialog
@@ -99,41 +137,52 @@ const handleAddFood = () => {
         />
       </div>
 
-      <div>
-        <div
-          class="flex flex-row w-full items-center gap-2 justify-between p-3 border-b dark:border-b-gray-700"
-          v-for="food in foodHistoryStore.history"
-          :key="food.id"
+      <div class="flex flex-col gap-4">
+        <div 
+          v-for="[date, data] in groupedHistory" 
+          :key="date" 
+          class="border rounded-lg overflow-hidden dark:border-gray-700 mb-4"
         >
-          <div class="flex flex-col gap-2 pb-2">
-            <p class="text-lg font-bold">{{ food.name }}</p>
-            <p class="text-sm text-gray-500 flex gap-2">
-              <span>{{ food.calories }} calories</span>
-              -
-              <span>{{ formatTime(food.timestamp) }}</span>
-            </p>
+          <div class="bg-gray-50 dark:bg-gray-800 p-3">
+            <h3 class="font-semibold">{{ date }}</h3>
+            <p class="text-sm text-gray-500">Total: {{ data.totalCalories }} calories</p>
           </div>
-          <div class="flex flex-row gap-2">
-            <Button
-              @click="foodHistoryStore.removeFood(food.id)"
-              size="small"
-              icon="pi pi-trash"
-              severity="danger"
-            ></Button>
-            <Button
-              @click="
-                visibleEdit = true;
-                selectedFood = {
-                  id: food.id,
-                  name: food.name,
-                  calories: food.calories,
-                };
-              "
-              :disabled="foodHistoryStore.history.length === 0"
-              size="small"
-              icon="pi pi-pen-to-square"
-              severity="secondary"
-            ></Button>
+          
+          <div
+            v-for="food in data.foods"
+            :key="food.id"
+            class="flex flex-row w-full items-center gap-2 justify-between p-3 border-t dark:border-gray-700"
+          >
+            <div class="flex flex-col gap-2">
+              <p class="text-lg font-bold">{{ food.name }}</p>
+              <p class="text-sm text-gray-500 flex gap-2">
+                <span>{{ food.calories }} calories</span>
+                -
+                <span>{{ formatTime(food.timestamp.toString()) }}</span>
+              </p>
+            </div>
+            <div class="flex flex-row gap-2">
+              <Button
+                @click="foodHistoryStore.removeFood(food.id)"
+                size="small"
+                icon="pi pi-trash"
+                severity="danger"
+              />
+              <Button
+                @click="
+                  visibleEdit = true;
+                  selectedFood = {
+                    id: food.id,
+                    name: food.name,
+                    calories: food.calories,
+                  };
+                "
+                :disabled="foodHistoryStore.history.length === 0"
+                size="small"
+                icon="pi pi-pen-to-square"
+                severity="secondary"
+              />
+            </div>
           </div>
         </div>
       </div>
