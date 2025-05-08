@@ -4,15 +4,17 @@
     <main class="p-2 flex-grow">
       <RouterView />
     </main>
-    <Footer />
+    <Footer v-if="$route.path !== '/'" />
   </div>
 </template>
 
 <script setup>
 import Navbar from "./components/Navbar.vue";
 import Footer from "./components/Footer.vue";
-
+import { useRoute } from "vue-router";
 import { router } from "./router";
+
+const route = useRoute();
 
 router.afterEach((to) => {
   // Update the page title
