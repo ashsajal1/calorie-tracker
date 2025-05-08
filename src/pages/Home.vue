@@ -3,8 +3,9 @@ import { useCalorieStore } from "@/stores/calorieStore";
 import { Button, Dialog, InputText, InputNumber } from "primevue";
 import { reactive, ref, computed } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
-import { formatTime } from "../utils/lib";
+import { calculateRequiredCalories, formatTime } from "../utils/lib";
 import WaveProgress from "@/components/WaveProgress.vue";
+import { useProfileStore } from "@/stores/profileStore";
 
 interface FoodGroup {
   foods: Array<{
@@ -35,27 +36,30 @@ const selectedFood = reactive({
 });
 
 const groupedHistory = computed(() => {
-  const groups = foodHistoryStore.history.reduce((acc: GroupedHistory, food) => {
-    const date = new Date(food.timestamp).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-    
-    if (!acc[date]) {
-      acc[date] = {
-        foods: [],
-        totalCalories: 0
-      };
-    }
-    
-    acc[date].foods.push(food);
-    acc[date].totalCalories += food.calories;
-    return acc;
-  }, {});
+  const groups = foodHistoryStore.history.reduce(
+    (acc: GroupedHistory, food) => {
+      const date = new Date(food.timestamp).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
 
-  return Object.entries(groups).sort((a, b) => 
-    new Date(b[0]).getTime() - new Date(a[0]).getTime()
+      if (!acc[date]) {
+        acc[date] = {
+          foods: [],
+          totalCalories: 0,
+        };
+      }
+
+      acc[date].foods.push(food);
+      acc[date].totalCalories += food.calories;
+      return acc;
+    },
+    {}
+  );
+
+  return Object.entries(groups).sort(
+    (a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime()
   );
 });
 
@@ -69,12 +73,25 @@ const handleAddFood = () => {
     visible.value = false;
   }
 };
+
+const profileStore = useProfileStore();
+const requiredCalories = computed(() => {
+  const calorie = calculateRequiredCalories(
+    profileStore.weight!,
+    profileStore.height!,
+    profileStore.age!
+  );
+  return calorie;
+});
 </script>
 
 <template>
   <main class="flex sm:flex-row flex-col gap-4 p-4 md:justify-between">
     <div class="p-4 grid place-items-center">
-      <WaveProgress :current="foodHistoryStore.todayCalories" :target="1500" />
+      <WaveProgress
+        :current="foodHistoryStore.todayCalories"
+        :target="requiredCalories"
+      />
     </div>
 
     <Dialog
@@ -138,16 +155,18 @@ const handleAddFood = () => {
       </div>
 
       <div class="flex flex-col gap-4">
-        <div 
-          v-for="[date, data] in groupedHistory" 
-          :key="date" 
+        <div
+          v-for="[date, data] in groupedHistory"
+          :key="date"
           class="border rounded-lg overflow-hidden dark:border-gray-700 mb-4"
         >
           <div class="bg-gray-50 dark:bg-gray-800 p-3">
             <h3 class="font-semibold">{{ date }}</h3>
-            <p class="text-sm text-gray-500">Total: {{ data.totalCalories }} calories</p>
+            <p class="text-sm text-gray-500">
+              Total: {{ data.totalCalories }} calories
+            </p>
           </div>
-          
+
           <div
             v-for="food in data.foods"
             :key="food.id"

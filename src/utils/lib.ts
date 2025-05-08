@@ -43,7 +43,7 @@ export function formatTime(isoTimestamp: string) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-const calculateRequiredCalories = (
+export const calculateRequiredCalories = (
   weight: number,
   height: number,
   age: number
