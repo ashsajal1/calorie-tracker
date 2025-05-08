@@ -1,19 +1,19 @@
 // Storage Utils
 export const setItem = (key: string, value: any): void => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     localStorage.setItem(key, JSON.stringify(value));
   }
 };
 
 export const getItem = (key: string): any => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     return JSON.parse(localStorage.getItem(key) as string);
   }
   return null;
 };
 
 export const removeItem = (key: string): void => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     localStorage.removeItem(key);
   }
 };
@@ -38,8 +38,17 @@ export const toCamelCase = (str: string): string => {
   return str.replace(/-./g, (match) => match.charAt(1).toUpperCase());
 };
 
-
 export function formatTime(isoTimestamp: string) {
   const date = new Date(isoTimestamp);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+
+const calculateRequiredCalories = (
+  weight: number,
+  height: number,
+  age: number
+): number => {
+  // Mifflin-St Jeor Equation for BMR
+  const bmr = 10 * weight + 6.25 * height - 5 * age + 5; // For males
+  return bmr;
+};
