@@ -46,9 +46,16 @@ export function formatTime(isoTimestamp: string) {
 export const calculateRequiredCalories = (
   weight: number,
   height: number,
-  age: number
+  age: number,
+  surplus: boolean = false
 ): number => {
   // Mifflin-St Jeor Equation for BMR
   const bmr = 10 * weight + 6.25 * height - 5 * age + 5; // For males
-  return bmr;
+
+  // Assume moderate activity (TDEE ≈ BMR * 1.55)
+  const tdee = bmr * 1.55;
+
+  // Add surplus if needed (e.g., 15% surplus)
+  return surplus ? tdee * 1.15 : tdee;
 };
+
