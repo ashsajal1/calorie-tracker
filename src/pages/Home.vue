@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useCalorieStore } from "@/stores/calorieStore";
-import { Button, Dialog, InputText, InputNumber, Calendar } from "primevue";
+import { Button, Dialog, InputText, InputNumber, Calendar, Dropdown } from "primevue";
 import Chart from 'primevue/chart';
 import { reactive, ref, computed } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
-import { calculateRequiredCalories, formatTime } from "../utils/lib";
+import { calculateRequiredCalories, formatTime, getFoodList, calculateFoodCalories, getFoodsByCategory } from "../utils/lib";
 import WaveProgress from "@/components/WaveProgress.vue";
 import { useProfileStore } from "@/stores/profileStore";
 
@@ -22,6 +22,8 @@ interface GroupedHistory {
   [date: string]: FoodGroup;
 }
 
+type FoodCategory = 'protein' | 'carbs' | 'fats' | 'vegetables' | 'fruits' | 'dairy' | 'snacks';
+
 const calorieStore = useCalorieStore();
 const foodHistoryStore = useFoodHistoryStore();
 const visible = ref(false);
@@ -31,12 +33,46 @@ const dateRange = ref<[Date | null, Date | null]>([null, null]);
 
 const foodName = ref("");
 const calories = ref(0);
-
+const selectedCategory = ref<FoodCategory | "">("");
 const selectedFood = reactive({
   id: "",
   name: "",
   calories: 0,
+  servingSize: 100,
 });
+
+// Get food list and categories
+const foodList = getFoodList();
+const categories = computed(() => {
+  const uniqueCategories = new Set(foodList.map(food => food.category));
+  return Array.from(uniqueCategories).map(category => ({
+    label: category.charAt(0).toUpperCase() + category.slice(1),
+    value: category
+  }));
+});
+
+const filteredFoods = computed(() => {
+  if (!selectedCategory.value) return [];
+  return getFoodsByCategory(selectedCategory.value).map(food => ({
+    label: `${food.name} (${food.calories} cal/100${food.servingUnit})`,
+    value: food.id,
+    food: food
+  }));
+});
+
+const handleFoodSelect = (event: any) => {
+  const selectedFoodData = foodList.find(f => f.id === event.value);
+  if (selectedFoodData) {
+    foodName.value = selectedFoodData.name;
+    calories.value = calculateFoodCalories(selectedFoodData.id, selectedFood.servingSize);
+  }
+};
+
+const handleServingSizeChange = (size: number) => {
+  if (selectedFood.id) {
+    calories.value = calculateFoodCalories(selectedFood.id, size);
+  }
+};
 
 const groupedHistory = computed(() => {
   const groups = foodHistoryStore.history.reduce(
@@ -263,16 +299,58 @@ const requiredCalories = computed(() => {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 transition-all hover:shadow-md">
           <h2 class="text-xl font-semibold mb-4">Quick Add Food</h2>
           <div class="flex flex-col gap-4">
-            <InputText 
-              v-model="foodName" 
-              placeholder="Food Name" 
-              class="w-full"
-            />
-            <InputNumber 
-              v-model="calories" 
-              placeholder="Calories" 
-              class="w-full"
-            />
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Food Category</label>
+              <Dropdown
+                v-model="selectedCategory"
+                :options="categories"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select a category"
+                class="w-full"
+              />
+            </div>
+            
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Select Food</label>
+              <Dropdown
+                v-model="selectedFood.id"
+                :options="filteredFoods"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select a food"
+                class="w-full"
+                :disabled="!selectedCategory"
+                @change="handleFoodSelect"
+              />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Serving Size</label>
+              <div class="flex gap-2">
+                <InputNumber
+                  v-model="selectedFood.servingSize"
+                  placeholder="Serving size"
+                  class="w-full"
+                  :min="1"
+                  @update:modelValue="handleServingSizeChange"
+                />
+                <span class="flex items-center text-gray-500">
+                  {{ selectedFood.id ? foodList.find(f => f.id === selectedFood.id)?.servingUnit : 'g' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium">Calories</label>
+              <InputNumber
+                v-model="calories"
+                placeholder="Calories"
+                class="w-full"
+                :disabled="true"
+              />
+            </div>
+
             <Button
               @click="handleAddFood"
               icon="pi pi-plus"
@@ -365,6 +443,7 @@ const requiredCalories = computed(() => {
                         id: food.id,
                         name: food.name,
                         calories: food.calories,
+                        servingSize: 100
                       };
                     "
                     icon="pi pi-pencil"
