@@ -43,12 +43,22 @@ export function formatTime(isoTimestamp: string) {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+/**
+ * Calculates the required daily calorie intake based on personal metrics and goals.
+ * 
+ * @param weight - Weight in kilograms
+ * @param height - Height in centimeters
+ * @param age - Age in years
+ * @param goal - Weight management goal: "weight_loss", "weight_gain", or "maintain"
+ * @param gender - "male" or "female"
+ * @param workStatus - Activity level: "sedentary", "moderate", "active", or "very_active"
+ * @returns The calculated daily calorie requirement (rounded to nearest integer)
+ */
 export const calculateRequiredCalories = (
   weight: number,
   height: number,
   age: number,
   goal: "weight_loss" | "weight_gain" | "maintain",
-  surplus: boolean = false,
   gender: string = "male",
   workStatus: "active" | "sedentary" | "moderate" | "very_active" = "active" // active, sedentary, moderate, very_active
 ): number => {
@@ -93,11 +103,6 @@ export const calculateRequiredCalories = (
     case "maintain":
       // No adjustment needed for maintenance
       break;
-  }
-
-  // Legacy surplus parameter support
-  if (surplus) {
-    tdee += 500; // Add 500 calories for bulking
   }
 
   return Math.round(tdee);
