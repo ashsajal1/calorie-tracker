@@ -6,6 +6,11 @@ export const useProfileStore = defineStore("profile", () => {
   const age = ref<number | null>(null);
   const weight = ref<number | null>(null); // in kilograms
   const height = ref<number | null>(null); // in centimeters
+  const workStatus = ref<"active" | "sedentary" | "moderate" | "very_active">(
+    "active"
+  );
+  const gender = ref<"male" | "female">("male");
+  const goal = ref<"weight_loss" | "weight_gain" | "maintain">("maintain");
 
   function setName(newName: string) {
     name.value = newName;
@@ -21,6 +26,20 @@ export const useProfileStore = defineStore("profile", () => {
 
   function setHeight(newHeight: number) {
     height.value = newHeight;
+  }
+
+  function setWorkStatus(
+    newWorkStatus: "active" | "sedentary" | "moderate" | "very_active"
+  ) {
+    workStatus.value = newWorkStatus;
+  }
+
+  function setGender(newGender: "male" | "female") {
+    gender.value = newGender;
+  }
+
+  function setGoal(newGoal: "weight_loss" | "weight_gain" | "maintain") {
+    goal.value = newGoal;
   }
 
   function resetProfile() {
@@ -54,15 +73,19 @@ export const useProfileStore = defineStore("profile", () => {
     }
   }
 
-  watch([name, age, weight, height], ([newName, newAge, newWeight, newHeight]) => {
-    const data = {
-      name: newName,
-      age: newAge,
-      weight: newWeight,
-      height: newHeight,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }, { deep: true });
+  watch(
+    [name, age, weight, height],
+    ([newName, newAge, newWeight, newHeight]) => {
+      const data = {
+        name: newName,
+        age: newAge,
+        weight: newWeight,
+        height: newHeight,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    },
+    { deep: true }
+  );
 
   loadFromStorage();
 
@@ -75,6 +98,9 @@ export const useProfileStore = defineStore("profile", () => {
     setAge,
     setWeight,
     setHeight,
+    setGender,
+    setGoal,
+    setWorkStatus,
     resetProfile,
     bmi,
   };
