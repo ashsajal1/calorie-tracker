@@ -47,6 +47,7 @@ export const calculateRequiredCalories = (
   weight: number,
   height: number,
   age: number,
+  goal: "weight_loss" | "weight_gain" | "maintain",
   surplus: boolean = false,
   gender: string = "male",
   workStatus: "active" | "sedentary" | "moderate" | "very_active" = "active" // active, sedentary, moderate, very_active
@@ -81,7 +82,20 @@ export const calculateRequiredCalories = (
   // Calculate total daily energy expenditure (TDEE)
   let tdee = bmr * activityMultiplier;
 
-  // Apply surplus/deficit if needed
+  // Apply goal-based adjustments
+  switch (goal) {
+    case "weight_loss":
+      tdee -= 500; // Deficit of 500 calories for weight loss
+      break;
+    case "weight_gain":
+      tdee += 500; // Surplus of 500 calories for weight gain
+      break;
+    case "maintain":
+      // No adjustment needed for maintenance
+      break;
+  }
+
+  // Legacy surplus parameter support
   if (surplus) {
     tdee += 500; // Add 500 calories for bulking
   }
