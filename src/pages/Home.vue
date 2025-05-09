@@ -205,19 +205,112 @@ const weeklyStats = computed(() => {
         label: "Daily Calories",
         data: dailyCalories,
         fill: true,
-        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        backgroundColor: "rgba(75, 192, 192, 0.1)",
         borderColor: "rgb(75, 192, 192)",
+        borderWidth: 2,
         tension: 0.4,
+        pointBackgroundColor: "rgb(75, 192, 192)",
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: "rgb(75, 192, 192)",
+        pointHoverBorderColor: "#fff",
+        pointHoverBorderWidth: 2,
       },
       {
         label: "Target",
         data: Array(7).fill(requiredCalories.value),
         borderColor: "rgb(255, 99, 132)",
+        borderWidth: 2,
         borderDash: [5, 5],
         fill: false,
         tension: 0.4,
+        pointRadius: 0,
       },
     ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+        labels: {
+          color: "var(--text-color)",
+          usePointStyle: true,
+          pointStyle: "circle",
+          padding: 20,
+          font: {
+            size: 12,
+            weight: "500",
+          },
+        },
+      },
+      tooltip: {
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        padding: 12,
+        titleFont: {
+          size: 14,
+          weight: "600",
+        },
+        bodyFont: {
+          size: 13,
+        },
+        cornerRadius: 8,
+        displayColors: true,
+        callbacks: {
+          label: function (context: any) {
+            return `${context.dataset.label}: ${context.parsed.y} calories`;
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: "var(--surface-border)",
+          drawBorder: false,
+          borderDash: [5, 5],
+        },
+        ticks: {
+          color: "var(--text-color)",
+          padding: 10,
+          font: {
+            size: 12,
+          },
+        },
+        border: {
+          display: false,
+        },
+      },
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: "var(--text-color)",
+          padding: 10,
+          font: {
+            size: 12,
+          },
+        },
+        border: {
+          display: false,
+        },
+      },
+    },
+    interaction: {
+      intersect: false,
+      mode: "index",
+    },
+    elements: {
+      line: {
+        tension: 0.4,
+      },
+    },
   };
 
   return {
@@ -227,6 +320,7 @@ const weeklyStats = computed(() => {
       (food) => new Date(food.timestamp) >= weekStart
     ).length,
     chartData,
+    chartOptions,
   };
 });
 
@@ -314,36 +408,7 @@ const requiredCalories = computed(() => {
             <Chart
               type="line"
               :data="weeklyStats.chartData"
-              :options="{
-                plugins: {
-                  legend: {
-                    position: 'top',
-                    labels: {
-                      color: 'var(--text-color)',
-                    },
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    grid: {
-                      color: 'var(--surface-border)',
-                    },
-                    ticks: {
-                      color: 'var(--text-color)',
-                    },
-                  },
-                  x: {
-                    grid: {
-                      color: 'var(--surface-border)',
-                    },
-                    ticks: {
-                      color: 'var(--text-color)',
-                    },
-                  },
-                },
-                maintainAspectRatio: false,
-              }"
+              :options="weeklyStats.chartOptions"
             />
           </div>
         </div>
@@ -703,6 +768,10 @@ const requiredCalories = computed(() => {
 :deep(.p-chart) {
   width: 100%;
   height: 100%;
+}
+
+:deep(.p-chart canvas) {
+  transition: all 0.3s ease;
 }
 
 .bg-primary-100 {
