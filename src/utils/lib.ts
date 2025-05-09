@@ -47,15 +47,44 @@ export const calculateRequiredCalories = (
   weight: number,
   height: number,
   age: number,
-  surplus: boolean = false
+  surplus: boolean = false,
+  gender: string = "male",
+  workStatus: "active" | "sedentary" | "moderate" | "very_active" = "active" // active, sedentary, moderate, very_active
 ): number => {
-  // Mifflin-St Jeor Equation for BMR
-  const bmr = 10 * weight + 6.25 * height - 5 * age + 5; // For males
+  // Calculate Basal Metabolic Rate (BMR) using the Mifflin-St Jeor Equation
+  let bmr = 0;
 
-  // Assume moderate activity (TDEE ≈ BMR * 1.55)
-  const tdee = bmr * 1.55;
+  if (gender === "male") {
+    bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  } else {
+    bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+  }
 
-  // Add surplus if needed (e.g., 15% surplus)
-  return surplus ? tdee * 1.15 : tdee;
+  // Apply activity multiplier
+  let activityMultiplier = 1.2; // Default for sedentary
+
+  switch (workStatus) {
+    case "sedentary":
+      activityMultiplier = 1.2; // Little or no exercise
+      break;
+    case "moderate":
+      activityMultiplier = 1.55; // Moderate exercise 3-5 days/week
+      break;
+    case "active":
+      activityMultiplier = 1.725; // Active exercise 3-5 days/week
+      break;
+    case "very_active":
+      activityMultiplier = 1.9; // Very active exercise 6-7 days/week
+      break;
+  }
+
+  // Calculate total daily energy expenditure (TDEE)
+  let tdee = bmr * activityMultiplier;
+
+  // Apply surplus/deficit if needed
+  if (surplus) {
+    tdee += 500; // Add 500 calories for bulking
+  }
+
+  return Math.round(tdee);
 };
-
