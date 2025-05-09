@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCalorieStore } from "@/stores/calorieStore";
-import { Button, Dialog, InputText, InputNumber } from "primevue";
+import { Button, Dialog, InputText, InputNumber, Calendar } from "primevue";
 import { reactive, ref, computed } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
 import { calculateRequiredCalories, formatTime } from "../utils/lib";
@@ -25,6 +25,8 @@ const calorieStore = useCalorieStore();
 const foodHistoryStore = useFoodHistoryStore();
 const visible = ref(false);
 const visibleEdit = ref(false);
+const searchQuery = ref("");
+const dateRange = ref<[Date | null, Date | null]>([null, null]);
 
 const foodName = ref("");
 const calories = ref(0);
@@ -63,6 +65,56 @@ const groupedHistory = computed(() => {
   );
 });
 
+// Filtered history based on search and date range
+const filteredHistory = computed(() => {
+  let filtered = groupedHistory.value;
+
+  // Apply search filter
+  if (searchQuery.value) {
+    filtered = filtered.map(([date, data]) => [
+      date,
+      {
+        ...data,
+        foods: data.foods.filter((food) =>
+          food.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+        ),
+      },
+    ] as [string, FoodGroup]).filter(([_, data]) => data.foods.length > 0);
+  }
+
+  // Apply date range filter
+  if (dateRange.value[0] && dateRange.value[1]) {
+    const startDate = dateRange.value[0];
+    const endDate = dateRange.value[1];
+    filtered = filtered.filter(([date]) => {
+      const currentDate = new Date(date);
+      return currentDate >= startDate && currentDate <= endDate;
+    });
+  }
+
+  return filtered;
+});
+
+// Weekly statistics
+const weeklyStats = computed(() => {
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - 7);
+
+  const weekData = foodHistoryStore.history.filter(
+    (food) => new Date(food.timestamp) >= weekStart
+  );
+
+  const totalCalories = weekData.reduce((sum, food) => sum + food.calories, 0);
+  const avgCalories = Math.round(totalCalories / 7);
+
+  return {
+    total: totalCalories,
+    average: avgCalories,
+    entries: weekData.length,
+  };
+});
+
 const handleAddFood = () => {
   if (foodName.value && calories.value) {
     calorieStore.addCalories(calories.value);
@@ -92,9 +144,9 @@ const requiredCalories = computed(() => {
   <main class="min-h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Summary Section -->
     <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Calorie Progress -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 transition-all hover:shadow-md">
           <h2 class="text-xl font-semibold mb-4">Today's Progress</h2>
           <div class="flex justify-center">
             <WaveProgress
@@ -109,8 +161,33 @@ const requiredCalories = computed(() => {
           </div>
         </div>
 
+        <!-- Weekly Stats -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 transition-all hover:shadow-md">
+          <h2 class="text-xl font-semibold mb-4">Weekly Overview</h2>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="text-center">
+              <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
+              <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                {{ weeklyStats.total }}
+              </p>
+            </div>
+            <div class="text-center">
+              <p class="text-sm text-gray-500 dark:text-gray-400">Average</p>
+              <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                {{ weeklyStats.average }}
+              </p>
+            </div>
+            <div class="text-center">
+              <p class="text-sm text-gray-500 dark:text-gray-400">Entries</p>
+              <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                {{ weeklyStats.entries }}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Quick Add Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 transition-all hover:shadow-md">
           <h2 class="text-xl font-semibold mb-4">Quick Add Food</h2>
           <div class="flex flex-col gap-4">
             <InputText 
@@ -139,33 +216,49 @@ const requiredCalories = computed(() => {
 
     <!-- Food History Section -->
     <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">Eating History</h2>
-        <Button
-          @click="visible = true"
-          icon="pi pi-plus"
-          severity="primary"
-          label="Add Food"
-        />
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2 class="text-2xl font-bold">Eating History</h2>
+          <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <InputText
+              v-model="searchQuery"
+              placeholder="Search foods..."
+              class="w-full sm:w-64"
+            />
+            <Calendar
+              v-model="dateRange"
+              selectionMode="range"
+              :showIcon="true"
+              placeholder="Select date range"
+              class="w-full sm:w-64"
+            />
+            <Button
+              @click="visible = true"
+              icon="pi pi-plus"
+              severity="primary"
+              label="Add Food"
+            />
+          </div>
+        </div>
       </div>
 
       <!-- Empty State -->
-      <div v-if="groupedHistory.length === 0" class="text-center py-12">
+      <div v-if="filteredHistory.length === 0" class="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="text-gray-400 dark:text-gray-600 mb-4">
           <i class="pi pi-history text-6xl"></i>
         </div>
-        <h3 class="text-xl font-semibold mb-2">No Food History Yet</h3>
+        <h3 class="text-xl font-semibold mb-2">No Food History Found</h3>
         <p class="text-gray-500 dark:text-gray-400">
-          Start tracking your meals by adding your first food entry
+          {{ searchQuery ? 'No foods match your search' : 'Start tracking your meals by adding your first food entry' }}
         </p>
       </div>
 
       <!-- Food History List -->
       <div v-else class="flex flex-col gap-6">
         <div
-          v-for="[date, data] in groupedHistory"
+          v-for="[date, data] in filteredHistory"
           :key="date"
-          class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md"
         >
           <div class="bg-gray-50 dark:bg-gray-700 p-4">
             <div class="flex justify-between items-center">
@@ -321,3 +414,13 @@ const requiredCalories = computed(() => {
     </Dialog>
   </main>
 </template>
+
+<style scoped>
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+.hover\:shadow-md:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+</style>
