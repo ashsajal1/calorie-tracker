@@ -34,6 +34,7 @@ const dateRange = ref<[Date | null, Date | null]>([null, null]);
 const foodName = ref("");
 const calories = ref(0);
 const selectedCategory = ref<FoodCategory | "">("");
+const isCustomFood = ref(false);
 const selectedFood = reactive({
   id: "",
   name: "",
@@ -299,56 +300,103 @@ const requiredCalories = computed(() => {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 transition-all hover:shadow-md">
           <h2 class="text-xl font-semibold mb-4">Quick Add Food</h2>
           <div class="flex flex-col gap-4">
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium">Food Category</label>
-              <Dropdown
-                v-model="selectedCategory"
-                :options="categories"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Select a category"
-                class="w-full"
-              />
-            </div>
-            
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium">Select Food</label>
-              <Dropdown
-                v-model="selectedFood.id"
-                :options="filteredFoods"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Select a food"
-                class="w-full"
-                :disabled="!selectedCategory"
-                @change="handleFoodSelect"
-              />
+            <!-- Toggle between predefined and custom food -->
+            <div class="flex items-center gap-4 mb-2">
+              <Button
+                :class="{ 'bg-primary-100 dark:bg-primary-900': !isCustomFood }"
+                :severity="isCustomFood ? 'secondary' : 'primary'"
+                @click="isCustomFood = false"
+                class="flex-1"
+              >
+                <i class="pi pi-list mr-2"></i>
+                Predefined Foods
+              </Button>
+              <Button
+                :class="{ 'bg-primary-100 dark:bg-primary-900': isCustomFood }"
+                :severity="isCustomFood ? 'primary' : 'secondary'"
+                @click="isCustomFood = true"
+                class="flex-1"
+              >
+                <i class="pi pi-plus mr-2"></i>
+                Custom Food
+              </Button>
             </div>
 
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium">Serving Size</label>
-              <div class="flex gap-2">
-                <InputNumber
-                  v-model="selectedFood.servingSize"
-                  placeholder="Serving size"
+            <!-- Predefined Foods Section -->
+            <div v-if="!isCustomFood" class="flex flex-col gap-4">
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">Food Category</label>
+                <Dropdown
+                  v-model="selectedCategory"
+                  :options="categories"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select a category"
                   class="w-full"
-                  :min="1"
-                  @update:modelValue="handleServingSizeChange"
                 />
-                <span class="flex items-center text-gray-500">
-                  {{ selectedFood.id ? foodList.find(f => f.id === selectedFood.id)?.servingUnit : 'g' }}
-                </span>
+              </div>
+              
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">Select Food</label>
+                <Dropdown
+                  v-model="selectedFood.id"
+                  :options="filteredFoods"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select a food"
+                  class="w-full"
+                  :disabled="!selectedCategory"
+                  @change="handleFoodSelect"
+                />
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">Serving Size</label>
+                <div class="flex gap-2">
+                  <InputNumber
+                    v-model="selectedFood.servingSize"
+                    placeholder="Serving size"
+                    class="w-full"
+                    :min="1"
+                    @update:modelValue="handleServingSizeChange"
+                  />
+                  <span class="flex items-center text-gray-500">
+                    {{ selectedFood.id ? foodList.find(f => f.id === selectedFood.id)?.servingUnit : 'g' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">Calories</label>
+                <InputNumber
+                  v-model="calories"
+                  placeholder="Calories"
+                  class="w-full"
+                  :disabled="true"
+                />
               </div>
             </div>
 
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium">Calories</label>
-              <InputNumber
-                v-model="calories"
-                placeholder="Calories"
-                class="w-full"
-                :disabled="true"
-              />
+            <!-- Custom Food Section -->
+            <div v-else class="flex flex-col gap-4">
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">Food Name</label>
+                <InputText
+                  v-model="foodName"
+                  placeholder="Enter food name"
+                  class="w-full"
+                />
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium">Calories</label>
+                <InputNumber
+                  v-model="calories"
+                  placeholder="Enter calories"
+                  class="w-full"
+                  :min="0"
+                />
+              </div>
             </div>
 
             <Button
@@ -356,7 +404,7 @@ const requiredCalories = computed(() => {
               icon="pi pi-plus"
               severity="success"
               class="w-full"
-              :disabled="!foodName || !calories"
+              :disabled="isCustomFood ? (!foodName || !calories) : (!selectedFood.id || !calories)"
             >
               Add Food
             </Button>
@@ -579,5 +627,13 @@ const requiredCalories = computed(() => {
 :deep(.p-chart) {
   width: 100%;
   height: 100%;
+}
+
+.bg-primary-100 {
+  background-color: var(--primary-100);
+}
+
+.dark .bg-primary-900 {
+  background-color: var(--primary-900);
 }
 </style>
