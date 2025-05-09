@@ -27,6 +27,9 @@
       </div>
     </template>
     <div class="flex flex-col gap-2">
+      <RouterLink to="/profile">
+          <Button icon="pi pi-user" class="w-full">Profile</Button>
+        </RouterLink>
       <RouterLink to="/">
         <Button label="Home" icon="pi pi-home" class="w-full" />
       </RouterLink>
