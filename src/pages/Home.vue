@@ -79,7 +79,10 @@ const requiredCalories = computed(() => {
   const calorie = calculateRequiredCalories(
     profileStore.weight!,
     profileStore.height!,
-    profileStore.age!
+    profileStore.age!,
+    profileStore.goal!,
+    profileStore.gender!,
+    profileStore.workStatus!
   );
   return calorie;
 });
