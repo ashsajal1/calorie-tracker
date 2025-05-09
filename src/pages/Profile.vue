@@ -172,14 +172,14 @@
           <div class="flex justify-end">
             <Button 
               type="submit" 
+              label="Update Profile"
               severity="success"
               :loading="isSubmitting"
               :disabled="v$.$invalid"
             >
               <template #icon>
-                <i class="pi pi-check mr-2"></i>
+                <i class="pi pi-check"></i>
               </template>
-              Update Profile
             </Button>
           </div>
         </form>
