@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCalorieStore } from "@/stores/calorieStore";
 import { Button, Dialog, InputText, InputNumber, Calendar } from "primevue";
+import Chart from 'primevue/chart';
 import { reactive, ref, computed } from "vue";
 import { useFoodHistoryStore } from "../stores/foodHistoryStore";
 import { calculateRequiredCalories, formatTime } from "../utils/lib";
@@ -95,23 +96,63 @@ const filteredHistory = computed(() => {
   return filtered;
 });
 
-// Weekly statistics
+// Weekly statistics with chart data
 const weeklyStats = computed(() => {
   const today = new Date();
   const weekStart = new Date(today);
   weekStart.setDate(today.getDate() - 7);
 
-  const weekData = foodHistoryStore.history.filter(
-    (food) => new Date(food.timestamp) >= weekStart
-  );
+  // Create array of last 7 days
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    return date;
+  }).reverse();
 
-  const totalCalories = weekData.reduce((sum, food) => sum + food.calories, 0);
+  // Get calories for each day
+  const dailyCalories = days.map(date => {
+    const dayStart = new Date(date.setHours(0, 0, 0, 0));
+    const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+    
+    return foodHistoryStore.history
+      .filter(food => {
+        const foodDate = new Date(food.timestamp);
+        return foodDate >= dayStart && foodDate <= dayEnd;
+      })
+      .reduce((sum, food) => sum + food.calories, 0);
+  });
+
+  const totalCalories = dailyCalories.reduce((sum, calories) => sum + calories, 0);
   const avgCalories = Math.round(totalCalories / 7);
+
+  // Chart data
+  const chartData = {
+    labels: days.map(date => date.toLocaleDateString('en-US', { weekday: 'short' })),
+    datasets: [
+      {
+        label: 'Daily Calories',
+        data: dailyCalories,
+        fill: true,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.4
+      },
+      {
+        label: 'Target',
+        data: Array(7).fill(requiredCalories.value),
+        borderColor: 'rgb(255, 99, 132)',
+        borderDash: [5, 5],
+        fill: false,
+        tension: 0.4
+      }
+    ]
+  };
 
   return {
     total: totalCalories,
     average: avgCalories,
-    entries: weekData.length,
+    entries: foodHistoryStore.history.filter(food => new Date(food.timestamp) >= weekStart).length,
+    chartData
   };
 });
 
@@ -164,7 +205,7 @@ const requiredCalories = computed(() => {
         <!-- Weekly Stats -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 transition-all hover:shadow-md">
           <h2 class="text-xl font-semibold mb-4">Weekly Overview</h2>
-          <div class="grid grid-cols-3 gap-4">
+          <div class="grid grid-cols-3 gap-4 mb-4">
             <div class="text-center">
               <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
               <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">
@@ -183,6 +224,38 @@ const requiredCalories = computed(() => {
                 {{ weeklyStats.entries }}
               </p>
             </div>
+          </div>
+          <div class="h-64">
+            <Chart type="line" :data="weeklyStats.chartData" :options="{
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    color: 'var(--text-color)'
+                  }
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    color: 'var(--surface-border)'
+                  },
+                  ticks: {
+                    color: 'var(--text-color)'
+                  }
+                },
+                x: {
+                  grid: {
+                    color: 'var(--surface-border)'
+                  },
+                  ticks: {
+                    color: 'var(--text-color)'
+                  }
+                }
+              },
+              maintainAspectRatio: false
+            }" />
           </div>
         </div>
 
@@ -422,5 +495,10 @@ const requiredCalories = computed(() => {
 
 .hover\:shadow-md:hover {
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+:deep(.p-chart) {
+  width: 100%;
+  height: 100%;
 }
 </style>
