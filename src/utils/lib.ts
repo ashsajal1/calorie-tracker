@@ -107,3 +107,83 @@ export const calculateRequiredCalories = (
 
   return Math.round(tdee);
 };
+
+interface Food {
+  id: string;
+  name: string;
+  calories: number;
+  category: 'protein' | 'carbs' | 'fats' | 'vegetables' | 'fruits' | 'dairy' | 'snacks';
+  servingSize: number; // in grams
+  servingUnit: string;
+}
+
+export const getFoodList = (): Food[] => {
+  return [
+    // Proteins
+    { id: 'chicken-breast', name: 'Chicken Breast', calories: 165, category: 'protein', servingSize: 100, servingUnit: 'g' },
+    { id: 'salmon', name: 'Salmon', calories: 208, category: 'protein', servingSize: 100, servingUnit: 'g' },
+    { id: 'eggs', name: 'Eggs', calories: 155, category: 'protein', servingSize: 100, servingUnit: 'g' },
+    { id: 'tofu', name: 'Tofu', calories: 76, category: 'protein', servingSize: 100, servingUnit: 'g' },
+    { id: 'lentils', name: 'Lentils', calories: 116, category: 'protein', servingSize: 100, servingUnit: 'g' },
+
+    // Carbs
+    { id: 'brown-rice', name: 'Brown Rice', calories: 112, category: 'carbs', servingSize: 100, servingUnit: 'g' },
+    { id: 'quinoa', name: 'Quinoa', calories: 120, category: 'carbs', servingSize: 100, servingUnit: 'g' },
+    { id: 'sweet-potato', name: 'Sweet Potato', calories: 86, category: 'carbs', servingSize: 100, servingUnit: 'g' },
+    { id: 'oats', name: 'Oats', calories: 389, category: 'carbs', servingSize: 100, servingUnit: 'g' },
+    { id: 'whole-wheat-bread', name: 'Whole Wheat Bread', calories: 247, category: 'carbs', servingSize: 100, servingUnit: 'g' },
+
+    // Vegetables
+    { id: 'broccoli', name: 'Broccoli', calories: 34, category: 'vegetables', servingSize: 100, servingUnit: 'g' },
+    { id: 'spinach', name: 'Spinach', calories: 23, category: 'vegetables', servingSize: 100, servingUnit: 'g' },
+    { id: 'carrots', name: 'Carrots', calories: 41, category: 'vegetables', servingSize: 100, servingUnit: 'g' },
+    { id: 'bell-pepper', name: 'Bell Pepper', calories: 31, category: 'vegetables', servingSize: 100, servingUnit: 'g' },
+    { id: 'cauliflower', name: 'Cauliflower', calories: 25, category: 'vegetables', servingSize: 100, servingUnit: 'g' },
+
+    // Fruits
+    { id: 'apple', name: 'Apple', calories: 52, category: 'fruits', servingSize: 100, servingUnit: 'g' },
+    { id: 'banana', name: 'Banana', calories: 89, category: 'fruits', servingSize: 100, servingUnit: 'g' },
+    { id: 'orange', name: 'Orange', calories: 47, category: 'fruits', servingSize: 100, servingUnit: 'g' },
+    { id: 'blueberries', name: 'Blueberries', calories: 57, category: 'fruits', servingSize: 100, servingUnit: 'g' },
+    { id: 'strawberries', name: 'Strawberries', calories: 32, category: 'fruits', servingSize: 100, servingUnit: 'g' },
+
+    // Dairy
+    { id: 'greek-yogurt', name: 'Greek Yogurt', calories: 59, category: 'dairy', servingSize: 100, servingUnit: 'g' },
+    { id: 'cottage-cheese', name: 'Cottage Cheese', calories: 98, category: 'dairy', servingSize: 100, servingUnit: 'g' },
+    { id: 'milk', name: 'Milk (2%)', calories: 50, category: 'dairy', servingSize: 100, servingUnit: 'ml' },
+    { id: 'cheese', name: 'Cheddar Cheese', calories: 403, category: 'dairy', servingSize: 100, servingUnit: 'g' },
+
+    // Fats
+    { id: 'avocado', name: 'Avocado', calories: 160, category: 'fats', servingSize: 100, servingUnit: 'g' },
+    { id: 'almonds', name: 'Almonds', calories: 579, category: 'fats', servingSize: 100, servingUnit: 'g' },
+    { id: 'olive-oil', name: 'Olive Oil', calories: 884, category: 'fats', servingSize: 100, servingUnit: 'ml' },
+    { id: 'peanut-butter', name: 'Peanut Butter', calories: 588, category: 'fats', servingSize: 100, servingUnit: 'g' },
+
+    // Snacks
+    { id: 'dark-chocolate', name: 'Dark Chocolate', calories: 546, category: 'snacks', servingSize: 100, servingUnit: 'g' },
+    { id: 'popcorn', name: 'Popcorn', calories: 375, category: 'snacks', servingSize: 100, servingUnit: 'g' },
+    { id: 'trail-mix', name: 'Trail Mix', calories: 462, category: 'snacks', servingSize: 100, servingUnit: 'g' }
+  ];
+};
+
+/**
+ * Calculate calories for a given food and serving size
+ * @param foodId - The ID of the food
+ * @param servingSize - The serving size in the food's serving unit
+ * @returns The calculated calories for the given serving size
+ */
+export const calculateFoodCalories = (foodId: string, servingSize: number): number => {
+  const food = getFoodList().find(f => f.id === foodId);
+  if (!food) return 0;
+  
+  return Math.round((food.calories * servingSize) / food.servingSize);
+};
+
+/**
+ * Get foods by category
+ * @param category - The food category to filter by
+ * @returns Array of foods in the specified category
+ */
+export const getFoodsByCategory = (category: Food['category']): Food[] => {
+  return getFoodList().filter(food => food.category === category);
+};
