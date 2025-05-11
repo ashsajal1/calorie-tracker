@@ -35,8 +35,11 @@ export const useFoodHistoryStore = defineStore("foodHistory", () => {
   function editFood(id: string, name: string, calories: number) {
     const entryIndex = history.value.findIndex((entry) => entry.id === id);
     if (entryIndex !== -1) {
-      history.value[entryIndex].name = name;
-      history.value[entryIndex].calories = calories;
+      history.value = [
+        ...history.value.slice(0, entryIndex),
+        { ...history.value[entryIndex], name, calories },
+        ...history.value.slice(entryIndex + 1)
+      ];
     }
   }
 
