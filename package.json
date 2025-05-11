@@ -24,20 +24,20 @@
     "primeicons": "^7.0.0",
     "primevue": "^4.2.3",
     "tailwindcss-primeui": "^0.3.4",
-    "vue": "^3.5.12",
-    "vue-router": "4",
+    "vue": "^3.5.13",
+    "vue-router": "^4.4.5",
     "vue3-fancy-template": "file:"
   },
   "devDependencies": {
     "@vite-pwa/assets-generator": "^0.2.6",
-    "@vitejs/plugin-vue": "^5.1.4",
+    "@vitejs/plugin-vue": "^5.2.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "postcss-import": "^16.1.0",
     "tailwindcss": "^3.4.15",
-    "typescript": "~5.6.2",
-    "vite": "^5.4.10",
+    "typescript": "~5.6.3",
+    "vite": "^5.4.11",
     "vite-plugin-pwa": "^0.21.0",
-    "vue-tsc": "^2.1.8"
+    "vue-tsc": "^2.1.10"
   }
 }
